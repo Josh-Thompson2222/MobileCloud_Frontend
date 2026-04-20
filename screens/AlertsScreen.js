@@ -9,7 +9,8 @@ import api from '../api/apiClient';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
     shouldPlaySound: true,
     shouldSetBadge: false,
   }),
@@ -64,21 +65,27 @@ export default function AlertsScreen() {
   };
 
   const toggleAlert = async (city, enabled) => {
-    try {
-      await api.put(`/cities/${city._id}/alert`, {
-        alertEnabled: enabled,
-        alertCondition: city.alertCondition,
-      });
-      setCities((prev) =>
-        prev.map((c) => (c._id === city._id ? { ...c, alertEnabled: enabled } : c))
-      );
-      if (enabled) {
-        await sendTestNotification(city.cityName);
-      }
-    } catch (_) {
-      Alert.alert('Error', 'Could not update alert');
+  console.log('city:', JSON.stringify(city));
+  console.log('enabled:', enabled);
+  try {
+    const response = await api.put(`/cities/${city._id}/alert`, {
+      alertEnabled: enabled,
+      alertCondition: city.alertCondition,
+    });
+    console.log('response:', JSON.stringify(response.data));
+    setCities((prev) =>
+      prev.map((c) => (c._id === city._id ? { ...c, alertEnabled: enabled } : c))
+    );
+    if (enabled) {
+      await sendTestNotification(city.cityName);
     }
-  };
+  } catch (err) {
+    console.log('error:', JSON.stringify(err.response?.data));
+    console.log('error status:', err.response?.status);
+    console.log('error message:', err.message);
+    Alert.alert('Error', 'Could not update alert');
+  }
+};
 
   const setCondition = async (city, condition) => {
     try {
@@ -95,14 +102,17 @@ export default function AlertsScreen() {
   };
 
   const sendTestNotification = async (cityName) => {
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: '🔔 Alert Enabled',
-        body: `You'll be notified about weather changes in ${cityName}`,
-      },
-      trigger: { seconds: 1 },
-    });
-  };
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: '🔔 Alert Enabled',
+      body: `You'll be notified about weather changes in ${cityName}`,
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+      seconds: 1,
+    },
+  });
+};
 
   const renderCity = ({ item }) => (
     <View style={styles.cityCard}>
