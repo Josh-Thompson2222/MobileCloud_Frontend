@@ -20,7 +20,7 @@ export default function LoginScreen({ navigation }) {
     try {
       await login(email.trim().toLowerCase(), password);
     } catch (err) {
-      Alert.alert('Login Failed', err.response?.data?.message || 'Something went wrong');
+      Alert.alert('Login Failed', err.message || 'Something went wrong');
     } finally {
       setLoading(false);
     }
