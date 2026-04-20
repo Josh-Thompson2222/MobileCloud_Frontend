@@ -39,15 +39,16 @@ export default function AlertsScreen() {
   );
 
   const requestNotificationPermission = async () => {
-    const { status } = await Notifications.requestPermissionsAsync();
-    setPermissionGranted(status === 'granted');
-    if (status === 'granted') {
-      const token = await Notifications.getExpoPushTokenAsync();
-      // Save push token to backend
-      try {
-        await api.put('/auth/push-token', { pushToken: token.data });
-      } catch (_) {}
-    }
+    try {
+      const { status } = await Notifications.requestPermissionsAsync();
+      setPermissionGranted(status === 'granted');
+      if (status === 'granted') {
+        try {
+          const token = await Notifications.getExpoPushTokenAsync();
+          await api.put('/auth/push-token', { pushToken: token.data });
+        } catch (_) {}
+      }
+    } catch (_) {}
   };
 
   const fetchCities = async () => {

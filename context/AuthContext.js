@@ -26,19 +26,29 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const register = async (name, email, password) => {
-    const res = await axios.post(`${API_URL}/auth/register`, {
-      name,
-      email,
-      password,
-    });
-    await AsyncStorage.setItem('user', JSON.stringify(res.data));
-    setUser(res.data);
+    try {
+      const res = await axios.post(`${API_URL}/auth/register`, {
+        name,
+        email,
+        password,
+      });
+      await AsyncStorage.setItem('user', JSON.stringify(res.data));
+      setUser(res.data);
+    } catch (error) {
+      const message = error.response?.data?.message || 'Registration failed. Please try again.';
+      throw new Error(message);
+    }
   };
 
   const login = async (email, password) => {
-    const res = await axios.post(`${API_URL}/auth/login`, { email, password });
-    await AsyncStorage.setItem('user', JSON.stringify(res.data));
-    setUser(res.data);
+    try {
+      const res = await axios.post(`${API_URL}/auth/login`, { email, password });
+      await AsyncStorage.setItem('user', JSON.stringify(res.data));
+      setUser(res.data);
+    } catch (error) {
+      const message = error.response?.data?.message || 'Login failed. Please try again.';
+      throw new Error(message);
+    }
   };
 
   const logout = async () => {
